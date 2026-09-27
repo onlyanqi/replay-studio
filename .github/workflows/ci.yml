@@ -1,0 +1,38 @@
+name: Verify Replay Studio
+on: [push, pull_request]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      valkey:
+        image: valkey/valkey:9.1-alpine
+        ports: ['6380:6379']
+        options: >-
+          --health-cmd "valkey-cli ping"
+          --health-interval 3s
+          --health-timeout 2s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+      - run: npx playwright install --with-deps chromium
+      - name: Verify browser flows
+        run: |
+          PORT=3001 PUBLIC_ORIGIN=http://localhost:3001 npm start > /tmp/replay-api.log 2>&1 &
+          npm run worker > /tmp/replay-worker.log 2>&1 &
+          for i in $(seq 1 30); do curl -fsS http://localhost:3001/api/health >/dev/null && break || sleep 2; done
+          npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-results
+          path: |
+            test-results/
+            /tmp/replay-api.log
+            /tmp/replay-worker.log

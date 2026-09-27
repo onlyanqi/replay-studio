@@ -1,0 +1,44 @@
+{
+  "name": "replay-studio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n api,worker,web \"tsx watch server/index.ts\" \"tsx watch server/worker.ts\" \"vite --host 127.0.0.1 --port 3001\"",
+    "build": "tsc --noEmit && vite build",
+    "start": "tsx server/index.ts",
+    "worker": "tsx server/worker.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
+    "test:e2e": "playwright test",
+    "format": "prettier --write src server tests scripts docs *.json *.ts *.md"
+  },
+  "dependencies": {
+    "bullmq": "^5.0.0",
+    "ioredis": "^5.0.0",
+    "express": "^5.0.0",
+    "cookie-parser": "^1.4.7",
+    "zod": "^4.0.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "lucide-react": "^0.577.0",
+    "dotenv": "^17.0.0",
+    "tsx": "^4.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/express": "^5.0.0",
+    "@types/cookie-parser": "^1.4.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.0.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "concurrently": "^9.0.0",
+    "@playwright/test": "^1.58.2",
+    "prettier": "^3.9.9"
+  }
+}

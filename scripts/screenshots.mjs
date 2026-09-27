@@ -1,0 +1,14 @@
+import { chromium } from '@playwright/test';
+import { mkdir } from 'node:fs/promises';
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 1440, height: 1050 } });
+await page.goto('http://localhost:3001');
+await page.getByRole('radio', { name: /Did it go through/ }).click();
+await page.getByRole('button', { name: 'Run this scenario' }).click();
+await page.getByText('Recovered without a duplicate', { exact: true }).waitFor({ timeout: 15000 });
+await page.evaluate(() => document.fonts.ready);
+await mkdir('docs/screenshots', { recursive: true });
+await page.screenshot({ path: 'docs/screenshots/desktop.png', fullPage: true });
+await page.setViewportSize({ width: 390, height: 844 });
+await page.screenshot({ path: 'docs/screenshots/mobile.png', fullPage: true });
+await browser.close();

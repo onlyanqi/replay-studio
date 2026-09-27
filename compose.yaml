@@ -1,0 +1,32 @@
+services:
+  store:
+    image: valkey/valkey:9.1-alpine
+    command: valkey-server --appendonly yes --appendfsync everysec --maxmemory-policy noeviction
+    volumes:
+      - replay-data:/data
+    healthcheck:
+      test: ['CMD', 'valkey-cli', 'ping']
+      interval: 3s
+      timeout: 2s
+      retries: 20
+  app:
+    build: .
+    ports:
+      - '127.0.0.1:3001:3002'
+    environment:
+      REDIS_URL: redis://store:6379
+      PUBLIC_ORIGIN: http://localhost:3001
+      HOST: 0.0.0.0
+    depends_on:
+      store:
+        condition: service_healthy
+  worker:
+    build: .
+    command: npm run worker
+    environment:
+      REDIS_URL: redis://store:6379
+    depends_on:
+      store:
+        condition: service_healthy
+volumes:
+  replay-data:
